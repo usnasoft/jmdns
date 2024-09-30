@@ -178,6 +178,7 @@ The project was originally started in December 2002 by Arthur van Hoff at Strang
 					</execution>
 				</executions>
 			</plugin>
+			<!--
 			<plugin>
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-javadoc-plugin</artifactId>
@@ -196,7 +197,7 @@ The project was originally started in December 2002 by Arthur van Hoff at Strang
 			            </configuration>
 			        </execution>
 			    </executions>
-			</plugin>
+			</plugin> -->
 		</plugins>
 		<pluginManagement>
 			<plugins>
