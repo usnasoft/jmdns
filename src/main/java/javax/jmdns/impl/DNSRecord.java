@@ -213,20 +213,19 @@ public abstract class DNSRecord extends DNSEntry {
 
         @Override
         void write(MessageOutputStream out) {
-            if (_addr != null) {
-                byte[] buffer = _addr.getAddress();
-                // If we have a type A records we should answer with a IPv4 address
-                if (_addr instanceof Inet4Address) {
-                    // All is good
-                } else {
-                    // Get the last four bytes
-                    byte[] tempbuffer = buffer;
-                    buffer = new byte[4];
-                    System.arraycopy(tempbuffer, 12, buffer, 0, 4);
-                }
-                int length = buffer.length;
-                out.writeBytes(buffer, 0, length);
+            if (_addr == null) {
+                return;
             }
+
+            byte[] buffer = _addr.getAddress();
+
+            // Check if the address is IPv6 (Inet6Address) and extract the last 4 bytes for IPv4 compatibility
+            if (_addr instanceof Inet6Address) {
+                buffer = new byte[4];
+                System.arraycopy(_addr.getAddress(), 12, buffer, 0, 4);
+            }
+
+            out.writeBytes(buffer, 0, buffer.length);
         }
 
         /*
@@ -333,10 +332,7 @@ public abstract class DNSRecord extends DNSEntry {
                     return false;
                 }
                 Address address = (Address) other;
-                if ((this.getAddress() == null) && (address.getAddress() != null)) {
-                    return false;
-                }
-                return this.getAddress().equals(address.getAddress());
+                return Objects.equals(this.getAddress(), address.getAddress());
             } catch (Exception e) {
                 logger1.info("Failed to compare addresses of DNSRecords", e);
                 return false;
@@ -358,6 +354,10 @@ public abstract class DNSRecord extends DNSEntry {
         @Override
         protected void toByteArray(DataOutputStream dout) throws IOException {
             super.toByteArray(dout);
+            if (this.getAddress() == null) {
+                return;
+            }
+
             byte[] buffer = this.getAddress().getAddress();
             for (byte b : buffer) {
                 dout.writeByte(b);
@@ -525,7 +525,7 @@ public abstract class DNSRecord extends DNSEntry {
         }
 
         @Override
-        DNSOutgoing addAnswer(JmDNSImpl dns, DNSIncoming in, InetAddress addr, int port, DNSOutgoing out) throws IOException {
+        DNSOutgoing addAnswer(JmDNSImpl dns, DNSIncoming in, InetAddress addr, int port, DNSOutgoing out) {
             return out;
         }
 
@@ -571,7 +571,7 @@ public abstract class DNSRecord extends DNSEntry {
         protected void toString(final StringBuilder sb) {
             super.toString(sb);
             sb.append(" alias: '")
-                .append(_alias != null ? _alias : "null")
+                .append(_alias)
                 .append('\'');
         }
 
